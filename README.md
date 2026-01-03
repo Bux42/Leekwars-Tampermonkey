@@ -2,6 +2,8 @@
 
 This is a tampermonkey script to export a json build directly from a leek page from [Leekwars](https://leekwars.com/)
 
+You can install it through Greasy Fork [here](https://greasyfork.org/en/scripts/561259-leekwars-tools) (or use the code from script.js directly)
+
 Once the script is added to tampermonkey, this menu should appear.
 
 ![alt text](https://i.imgur.com/BNA9aNH.png "Title")
