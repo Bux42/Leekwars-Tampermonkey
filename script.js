@@ -3,6 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      2025-07-15
 // @description  Leekwars QOL tools
+// @source       https://github.com/Bux42/Leekwars-Tampermonkey
 // @author       Bux42
 // @match        https://leekwars.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=leekwars.com
@@ -820,77 +821,21 @@ function getTotalCapital(level) {
   "use strict";
 
   function createMenu() {
-    const menu = document.createElement("div");
-    menu.id = "pixelplace-menu";
-    menu.innerHTML = `
-            <div id="menu-header">Leekwars tools
-                <button id="hide-menu-btn" style="float: right;">✖</button>
-            </div>
-            <div style="margin-top: 10px;">
-                <button id="leek-profile-to-json">Get leek JSON</button>
-            </div>
-        `;
+    const leekPageHeader = document.getElementsByClassName(
+      "page-header page-bar"
+    )[0];
 
-    // check if url starts with https://leekwars.com/api/leek/get/
-    if (window.location.href.startsWith("https://leekwars.com/api/leek/get/")) {
-      menu.innerHTML += `<div style="margin-top: 10px;">
-                <button id="leek-json-to-restator-json">Convert to restator JSON</button>
-                </div>`;
-    }
-
-    Object.assign(menu.style, {
-      position: "fixed",
-      top: "2px",
-      left: "2px",
-      width: "200px",
-      height: "100px",
-      backgroundColor: "#fff",
-      color: "#000",
-      border: "1px solid #ccc",
-      borderRadius: "8px",
-      zIndex: 9999,
-      padding: "10px",
-      resize: "both",
-      overflow: "auto",
-      boxShadow: "0 0 10px rgba(0,0,0,0.3)",
-      fontFamily: "sans-serif",
-    });
-
-    document.body.appendChild(menu);
-
-    // Dragging functionality
-    const header = document.getElementById("menu-header");
-    let isDragging = false,
-      offsetX = 0,
-      offsetY = 0;
-
-    header.style.cursor = "move";
-    header.style.background = "#eee";
-    header.style.padding = "5px";
-    header.style.borderBottom = "1px solid #ccc";
-
-    header.addEventListener("mousedown", (e) => {
-      isDragging = true;
-      offsetX = e.clientX - menu.offsetLeft;
-      offsetY = e.clientY - menu.offsetTop;
-    });
-
-    document.addEventListener("mousemove", (e) => {
-      if (isDragging) {
-        menu.style.left = `${e.clientX - offsetX}px`;
-        menu.style.top = `${e.clientY - offsetY}px`;
+    if (leekPageHeader && window.location.href.includes("/leek/")) {
+      const leekNameDiv = leekPageHeader.children[0];
+      if (leekNameDiv) {
+        // add export button next to leek name
+        const exportButton = document.createElement("button");
+        exportButton.id = "leek-profile-to-json";
+        exportButton.innerText = "Export Leek JSON";
+        exportButton.style.marginLeft = "10px";
+        leekPageHeader.parentElement.prepend(exportButton);
       }
-    });
-
-    document.addEventListener("mouseup", () => {
-      isDragging = false;
-    });
-
-    // Hide/Show button
-    document.getElementById("hide-menu-btn").addEventListener("click", () => {
-      menu.style.display = "none";
-      showButton.style.display = "block";
-    });
+    }
 
     // Export leek profile json (for leek-wars-generator shenanigans)
     document
@@ -958,11 +903,6 @@ function getTotalCapital(level) {
             // console.log("empty slot", componentsDivs[j]);
           }
         }
-
-        // const allToolTips = Array.from(
-        //   document.getElementsByClassName("v-tooltip__content")
-        // ).filter((el) => el.getElementsByClassName("amount").length > 0);
-        // console.log("allToolTips", allToolTips);
 
         const level = parseInt(
           document.getElementsByClassName("level")[0].innerText.split(" ")[1]
