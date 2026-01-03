@@ -966,7 +966,7 @@ function getTotalCapital(level) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `leek-${leekName}.json`;
+        a.download = `Official ${leekName}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
