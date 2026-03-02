@@ -217,7 +217,7 @@ const weaponNamesToIds = {
   WEAPON_ODACHI: 408,
   WEAPON_EXCALIBUR: 409,
   WEAPON_SCYTHE: 410,
-  WEAPON_QUANTUM_RIFLE: 281,
+  WEAPON_QUANTUM_RIFLE: 428,
 };
 
 const components = {
@@ -821,6 +821,154 @@ function getTotalCapital(level) {
 (function () {
   "use strict";
 
+  function exportBuild() {
+    const weaponDivs = document.getElementsByClassName("weapon");
+
+    const equippedWeaponIds = [];
+
+    // console.log("weaponDivs", weaponDivs);
+
+    for (var i = 0; i < weaponDivs.length; i++) {
+      if (weaponDivs[i].children[0].children[0].src) {
+        // console.log(weaponDivs[i].children[0].src);
+        const weaponImgSrc = weaponDivs[i].children[0].children[0].src;
+        const weaponName = weaponImgSrc.split("weapon/")[1].split(".png")[0];
+        const weaponVariableName = "WEAPON_" + weaponName.toUpperCase();
+        const weaponId = weaponNamesToIds[weaponVariableName];
+
+        if (!weaponId) {
+          alert("Weapon " + weaponName + " not found in weaponNamesToIds!");
+        }
+        // console.log(weaponId);
+        equippedWeaponIds.push(weaponId);
+      }
+    }
+
+    const chipDivs = document.getElementsByClassName("chip");
+    const equippedChipIds = [];
+
+    for (var j = 0; j < chipDivs.length; j++) {
+      if (chipDivs[j].children[0].src) {
+        // console.log(chipDivs[j].children[0].src);
+        const chipImgSrc = chipDivs[j].children[0].src;
+        const chipName = chipImgSrc.split("chip/")[1].split(".png")[0];
+        const chipVariableName = "CHIP_" + chipName.toUpperCase();
+        const chipId = chipNamesToIds[chipVariableName];
+
+        if (!chipId) {
+          alert("Chip " + chipName + " not found in chipNamesToIds!");
+        }
+        // console.log(chipId);
+        equippedChipIds.push(chipId);
+      }
+    }
+
+    const componentsDivs =
+      document.getElementsByClassName("components-grid")[0].children;
+    const equippedComponentsIds = [];
+
+    // console.log("componentsDivs", componentsDivs);
+
+    for (var k = 0; k < componentsDivs.length; k++) {
+      // console.log("componentsDivs[k]", componentsDivs[k]);
+      if (componentsDivs[k].className !== "component") {
+        continue;
+      }
+      const componentImg =
+        componentsDivs[k].children[0].children[0].children[0];
+
+      if (componentImg && componentImg.src) {
+        // console.log(componentImg);
+        const componentImgSrc = componentImg.src;
+        const componentName = componentImgSrc
+          .split("component/")[1]
+          .split(".png")[0];
+
+        // console.log("componentName", componentName);
+
+        const componentVariableName =
+          "COMPONENT_" + componentName.toUpperCase();
+
+        // console.log("componentVariableName", componentVariableName);
+        const componentId = componentNamesToIds[componentVariableName];
+
+        if (!componentId) {
+          alert(
+            "Component " + componentName + " not found in componentNamesToIds!",
+          );
+        }
+        // console.log(componentId);
+        equippedComponentsIds.push(componentId);
+      } else {
+        // console.log("empty slot", componentsDivs[j]);
+      }
+    }
+
+    const level = parseInt(
+      document.getElementsByClassName("level")[0].innerText.split(" ")[1],
+    );
+
+    const bonusStats = getBonusStats(equippedComponentsIds);
+    const totalStatsDom = getTotalStatsDom();
+    const investedStats = getInvestedStats(bonusStats, totalStatsDom, level);
+
+    // console.log("totalStatsDom", totalStatsDom);
+    // console.log("bonusStats", bonusStats);
+    // console.log("investedStats", investedStats);
+
+    const totalCapital = getTotalCapital(level);
+    // console.log("totalCapital", totalCapital);
+
+    const characteristicsDiv =
+      document.getElementsByClassName("characteristics")[0];
+    // console.log("characteristicsDiv", characteristicsDiv);
+
+    // try to get button with text "X capital"
+    let availableCapital = 0;
+    const buttons = characteristicsDiv.getElementsByTagName("button");
+
+    // if there are two buttons, the first one is invested capital
+    if (buttons.length >= 2) {
+      const availableCapitalButton = buttons[0];
+      availableCapital = parseInt(
+        availableCapitalButton.innerText.split(" ")[0],
+      );
+    }
+
+    // console.log("buttons", buttons);
+    // console.log("availableCapital", availableCapital);
+
+    const leekData = {
+      level: level,
+      investedStats: investedStats,
+      investedCapital: totalCapital - availableCapital,
+      totalCapital: totalCapital,
+      bonusStats: bonusStats,
+      equippedComponentIds: equippedComponentsIds,
+      selectedWeaponIds: equippedWeaponIds,
+      selectedChipIds: equippedChipIds,
+    };
+
+    const leekPageHeader = document.getElementsByClassName(
+      "page-header page-bar",
+    )[0];
+    const leekName = leekPageHeader.children[0].innerText.trim();
+
+    console.log("leekData", leekData);
+
+    // save leekData as json file with name leek-<leekName>.json
+    const leekDataStr = JSON.stringify(leekData, null, 2);
+    const blob = new Blob([leekDataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Official ${leekName}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   function createMenu() {
     const leekPageHeader = document.getElementsByClassName(
       "page-header page-bar",
@@ -835,151 +983,13 @@ function getTotalCapital(level) {
         exportButton.innerText = "Export Leek JSON";
         exportButton.style.marginLeft = "10px";
         leekPageHeader.parentElement.prepend(exportButton);
+
+        // Export leek profile json
+        exportButton.addEventListener("click", () => {
+          exportBuild();
+        });
       }
     }
-
-    // Export leek profile json (for leek-wars-generator shenanigans)
-    document
-      .getElementById("leek-profile-to-json")
-      .addEventListener("click", () => {
-        const weaponDivs = document.getElementsByClassName("weapon");
-
-        const equippedWeaponIds = [];
-
-        // console.log("weaponDivs", weaponDivs);
-
-        for (var i = 0; i < weaponDivs.length; i++) {
-          if (weaponDivs[i].children[0].children[0].src) {
-            // console.log(weaponDivs[i].children[0].src);
-            const weaponImgSrc = weaponDivs[i].children[0].children[0].src;
-            const weaponName = weaponImgSrc
-              .split("weapon/")[1]
-              .split(".png")[0];
-            const weaponVariableName = "WEAPON_" + weaponName.toUpperCase();
-            const weaponId = weaponNamesToIds[weaponVariableName];
-            // console.log(weaponId);
-            equippedWeaponIds.push(weaponId);
-          }
-        }
-
-        const chipDivs = document.getElementsByClassName("chip");
-        const equippedChipIds = [];
-
-        for (var j = 0; j < chipDivs.length; j++) {
-          if (chipDivs[j].children[0].src) {
-            // console.log(chipDivs[j].children[0].src);
-            const chipImgSrc = chipDivs[j].children[0].src;
-            const chipName = chipImgSrc.split("chip/")[1].split(".png")[0];
-            const chipVariableName = "CHIP_" + chipName.toUpperCase();
-            const chipId = chipNamesToIds[chipVariableName];
-            // console.log(chipId);
-            equippedChipIds.push(chipId);
-          }
-        }
-
-        const componentsDivs =
-          document.getElementsByClassName("components-grid")[0].children;
-        const equippedComponentsIds = [];
-
-        // console.log("componentsDivs", componentsDivs);
-
-        for (var k = 0; k < componentsDivs.length; k++) {
-          // console.log("componentsDivs[k]", componentsDivs[k]);
-          if (componentsDivs[k].className !== "component") {
-            continue;
-          }
-          const componentImg =
-            componentsDivs[k].children[0].children[0].children[0];
-
-          if (componentImg && componentImg.src) {
-            // console.log(componentImg);
-            const componentImgSrc = componentImg.src;
-            const componentName = componentImgSrc
-              .split("component/")[1]
-              .split(".png")[0];
-
-            // console.log("componentName", componentName);
-
-            const componentVariableName =
-              "COMPONENT_" + componentName.toUpperCase();
-
-            // console.log("componentVariableName", componentVariableName);
-            const componentId = componentNamesToIds[componentVariableName];
-            // console.log(componentId);
-            equippedComponentsIds.push(componentId);
-          } else {
-            // console.log("empty slot", componentsDivs[j]);
-          }
-        }
-
-        const level = parseInt(
-          document.getElementsByClassName("level")[0].innerText.split(" ")[1],
-        );
-
-        const bonusStats = getBonusStats(equippedComponentsIds);
-        const totalStatsDom = getTotalStatsDom();
-        const investedStats = getInvestedStats(
-          bonusStats,
-          totalStatsDom,
-          level,
-        );
-
-        // console.log("totalStatsDom", totalStatsDom);
-        // console.log("bonusStats", bonusStats);
-        // console.log("investedStats", investedStats);
-
-        const totalCapital = getTotalCapital(level);
-        // console.log("totalCapital", totalCapital);
-
-        const characteristicsDiv =
-          document.getElementsByClassName("characteristics")[0];
-        // console.log("characteristicsDiv", characteristicsDiv);
-
-        // try to get button with text "X capital"
-        let availableCapital = 0;
-        const buttons = characteristicsDiv.getElementsByTagName("button");
-
-        // if there are two buttons, the first one is invested capital
-        if (buttons.length >= 2) {
-          const availableCapitalButton = buttons[0];
-          availableCapital = parseInt(
-            availableCapitalButton.innerText.split(" ")[0],
-          );
-        }
-
-        // console.log("buttons", buttons);
-        // console.log("availableCapital", availableCapital);
-
-        const leekData = {
-          level: level,
-          investedStats: investedStats,
-          investedCapital: totalCapital - availableCapital,
-          totalCapital: totalCapital,
-          bonusStats: bonusStats,
-          equippedComponentIds: equippedComponentsIds,
-          selectedWeaponIds: equippedWeaponIds,
-          selectedChipIds: equippedChipIds,
-        };
-
-        const leekPageHeader = document.getElementsByClassName(
-          "page-header page-bar",
-        )[0];
-        const leekName = leekPageHeader.children[0].innerText.trim();
-
-        console.log("leekData", leekData);
-
-        // save leekData as json file with name leek-<leekName>.json
-        const leekDataStr = JSON.stringify(leekData, null, 2);
-        const blob = new Blob([leekDataStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `Official ${leekName}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      });
 
     // Show button when hidden
     const showButton = document.createElement("button");
@@ -1002,5 +1012,24 @@ function getTotalCapital(level) {
     document.body.appendChild(showButton);
   }
 
-  window.addEventListener("load", createMenu);
+  const runIfHeaderPresent = (obs) => {
+    const header = document.querySelector(".page-header.page-bar");
+    if (header) {
+      createMenu();
+      if (obs) obs.disconnect();
+      return true;
+    }
+    return false;
+  };
+
+  if (!runIfHeaderPresent()) {
+    const observer = new MutationObserver((_, obs) => {
+      runIfHeaderPresent(obs);
+    });
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+  }
 })();
