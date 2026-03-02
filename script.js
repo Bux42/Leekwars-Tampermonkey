@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Leekwars Tools
 // @namespace    http://tampermonkey.net/
-// @version      2025-07-15
+// @version      2026-02-28
 // @description  Leekwars QOL tools
 // @source       https://github.com/Bux42/Leekwars-Tampermonkey
 // @author       Bux42
@@ -217,6 +217,7 @@ const weaponNamesToIds = {
   WEAPON_ODACHI: 408,
   WEAPON_EXCALIBUR: 409,
   WEAPON_SCYTHE: 410,
+  WEAPON_QUANTUM_RIFLE: 281,
 };
 
 const components = {
@@ -779,30 +780,30 @@ function getTotalStatsDom() {
   return {
     life: parseInt(document.getElementsByClassName("color-life")[0].innerText),
     magic: parseInt(
-      document.getElementsByClassName("color-magic")[0].innerText
+      document.getElementsByClassName("color-magic")[0].innerText,
     ),
     strength: parseInt(
-      document.getElementsByClassName("color-strength")[0].innerText
+      document.getElementsByClassName("color-strength")[0].innerText,
     ),
     frequency: parseInt(
-      document.getElementsByClassName("color-frequency")[0].innerText
+      document.getElementsByClassName("color-frequency")[0].innerText,
     ),
     wisdom: parseInt(
-      document.getElementsByClassName("color-wisdom")[0].innerText
+      document.getElementsByClassName("color-wisdom")[0].innerText,
     ),
     cores: parseInt(
-      document.getElementsByClassName("color-cores")[0].innerText
+      document.getElementsByClassName("color-cores")[0].innerText,
     ),
     agility: parseInt(
-      document.getElementsByClassName("color-agility")[0].innerText
+      document.getElementsByClassName("color-agility")[0].innerText,
     ),
     ram: parseInt(document.getElementsByClassName("color-ram")[0].innerText),
     resistance: parseInt(
-      document.getElementsByClassName("color-resistance")[0].innerText
+      document.getElementsByClassName("color-resistance")[0].innerText,
     ),
     mp: parseInt(document.getElementsByClassName("color-mp")[0].innerText),
     science: parseInt(
-      document.getElementsByClassName("color-science")[0].innerText
+      document.getElementsByClassName("color-science")[0].innerText,
     ),
     tp: parseInt(document.getElementsByClassName("color-tp")[0].innerText),
   };
@@ -822,7 +823,7 @@ function getTotalCapital(level) {
 
   function createMenu() {
     const leekPageHeader = document.getElementsByClassName(
-      "page-header page-bar"
+      "page-header page-bar",
     )[0];
 
     if (leekPageHeader && window.location.href.includes("/leek/")) {
@@ -845,10 +846,12 @@ function getTotalCapital(level) {
 
         const equippedWeaponIds = [];
 
+        // console.log("weaponDivs", weaponDivs);
+
         for (var i = 0; i < weaponDivs.length; i++) {
-          if (weaponDivs[i].children[0].src) {
+          if (weaponDivs[i].children[0].children[0].src) {
             // console.log(weaponDivs[i].children[0].src);
-            const weaponImgSrc = weaponDivs[i].children[0].src;
+            const weaponImgSrc = weaponDivs[i].children[0].children[0].src;
             const weaponName = weaponImgSrc
               .split("weapon/")[1]
               .split(".png")[0];
@@ -878,13 +881,18 @@ function getTotalCapital(level) {
           document.getElementsByClassName("components-grid")[0].children;
         const equippedComponentsIds = [];
 
-        console.log("componentsDivs", componentsDivs);
+        // console.log("componentsDivs", componentsDivs);
 
-        for (var j = 0; j < componentsDivs.length; j++) {
-          const componentImg = componentsDivs[j].children[0].children[0];
+        for (var k = 0; k < componentsDivs.length; k++) {
+          // console.log("componentsDivs[k]", componentsDivs[k]);
+          if (componentsDivs[k].className !== "component") {
+            continue;
+          }
+          const componentImg =
+            componentsDivs[k].children[0].children[0].children[0];
 
-          if (componentImg.src) {
-            console.log(componentImg);
+          if (componentImg && componentImg.src) {
+            // console.log(componentImg);
             const componentImgSrc = componentImg.src;
             const componentName = componentImgSrc
               .split("component/")[1]
@@ -905,7 +913,7 @@ function getTotalCapital(level) {
         }
 
         const level = parseInt(
-          document.getElementsByClassName("level")[0].innerText.split(" ")[1]
+          document.getElementsByClassName("level")[0].innerText.split(" ")[1],
         );
 
         const bonusStats = getBonusStats(equippedComponentsIds);
@@ -913,7 +921,7 @@ function getTotalCapital(level) {
         const investedStats = getInvestedStats(
           bonusStats,
           totalStatsDom,
-          level
+          level,
         );
 
         // console.log("totalStatsDom", totalStatsDom);
@@ -935,7 +943,7 @@ function getTotalCapital(level) {
         if (buttons.length >= 2) {
           const availableCapitalButton = buttons[0];
           availableCapital = parseInt(
-            availableCapitalButton.innerText.split(" ")[0]
+            availableCapitalButton.innerText.split(" ")[0],
           );
         }
 
@@ -954,7 +962,7 @@ function getTotalCapital(level) {
         };
 
         const leekPageHeader = document.getElementsByClassName(
-          "page-header page-bar"
+          "page-header page-bar",
         )[0];
         const leekName = leekPageHeader.children[0].innerText.trim();
 
